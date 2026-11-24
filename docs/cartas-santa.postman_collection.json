@@ -1,0 +1,994 @@
+{
+  "info": {
+    "_postman_id": "573f5a49-cdcc-4bf5-861c-e84cebfedac8",
+    "name": "Taller de Santa - Cartas",
+    "description": "Escenario A. Ejecutar en orden (Runner). Variables: baseUrl, cartaId, cartaTraviesaId.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "58910533",
+    "_collection_link": "https://go.postman.co/collection/58910533-573f5a49-cdcc-4bf5-861c-e84cebfedac8?source=collection_link"
+  },
+  "item": [
+    {
+      "name": "01 POST registrar carta (201)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));",
+              "const c = pm.response.json();",
+              "pm.test('nace RECIBIDA', () => pm.expect(c.estado).to.eql('RECIBIDA'));",
+              "pm.collectionVariables.set('cartaId', c.id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"remitente\": \"Valentina\",\n  \"edad\": 8,\n  \"ciudad\": \"Guayaquil\",\n  \"regalos\": [\"Bicicleta\", \"Libro de dinosaurios\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "POST fuera de plazo (422)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('201 Created', () => pm.response.to.have.status(201));\nconst c = pm.response.json();\npm.test('nace RECIBIDA', () => pm.expect(c.estado).to.eql('RECIBIDA'));\npm.collectionVariables.set('cartaId', c.id);"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"remitente\": \"Valentina\",\n  \"edad\": 8,\n  \"ciudad\": \"Guayaquil\",\n  \"regalos\": [\"Bicicleta\", \"Libro de dinosaurios\"]\n}",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "http://localhost:8081/api/cartas",
+          "protocol": "http",
+          "host": [
+            "localhost"
+          ],
+          "port": "8081",
+          "path": [
+            "api",
+            "cartas"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "02 POST validación fallida (400)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('400', () => pm.response.to.have.status(400));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"remitente\": \"A\",\n  \"edad\": 20,\n  \"ciudad\": \"\",\n  \"regalos\": [\"Lego\", \"lego\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "03 POST carta de Bart (para TRAVIESO)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('201', () => pm.response.to.have.status(201));",
+              "pm.collectionVariables.set('cartaTraviesaId', pm.response.json().id);"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"remitente\": \"Bart\",\n  \"edad\": 10,\n  \"ciudad\": \"Quito\",\n  \"regalos\": [\"Patineta\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "04 GET listar con filtros",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas?estado=RECIBIDA&ciudad=guayaquil",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas"
+          ],
+          "query": [
+            {
+              "key": "estado",
+              "value": "RECIBIDA"
+            },
+            {
+              "key": "ciudad",
+              "value": "guayaquil"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "05 GET detalle",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "06 GET inexistente (404)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('404', () => pm.response.to.have.status(404));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/99999",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "99999"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "07 PUT editar en RECIBIDA (200)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"remitente\": \"Valentina\",\n  \"edad\": 8,\n  \"ciudad\": \"Guayaquil\",\n  \"regalos\": [\"Bicicleta\", \"Libro de dinosaurios\", \"Telescopio\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "08 PATCH sin credenciales (401)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test('401', () => pm.response.to.have.status(401));"
+            ]
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic"
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"APROBADA\" }",
+          "options": {
+            "raw": {
+              "language": "text"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "09 PATCH con rol ELFO (403)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('403', () => pm.response.to.have.status(403));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfo",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_01kh}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"APROBADA\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "10 PATCH transición inválida RECIBIDA→ENTREGADA (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('409', () => pm.response.to.have.status(409));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"ENTREGADA\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "11 PATCH APROBADA → SOAP BUENO (200 APROBADA)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));",
+              "pm.test('APROBADA/BUENO', () => { const c = pm.response.json(); pm.expect(c.estado).to.eql('APROBADA'); pm.expect(c.comportamiento).to.eql('BUENO'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"APROBADA\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "12 PATCH APROBADA Bart → SOAP TRAVIESO (200 RECHAZADA)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('RECHAZADA/TRAVIESO', () => { const c = pm.response.json(); pm.expect(c.estado).to.eql('RECHAZADA'); pm.expect(c.comportamiento).to.eql('TRAVIESO'); });"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"APROBADA\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaTraviesaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaTraviesaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "13 PUT fuera de RECIBIDA (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('409', () => pm.response.to.have.status(409));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "method": "PUT",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"remitente\": \"Valentina\",\n  \"edad\": 8,\n  \"ciudad\": \"Guayaquil\",\n  \"regalos\": [\"Consola\"]\n}"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "14 PATCH EN_PRODUCCION",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"EN_PRODUCCION\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "15 PATCH ENTREGADA",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('200', () => pm.response.to.have.status(200));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"ENTREGADA\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "16 DELETE carta ENTREGADA (409)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('409', () => pm.response.to.have.status(409));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaId}}"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "17 Simulador: activar mantenimiento",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/mock/lista/mantenimiento?activo=true",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "mock",
+            "lista",
+            "mantenimiento"
+          ],
+          "query": [
+            {
+              "key": "activo",
+              "value": "true"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "18 POST + PATCH con lista en mantenimiento (503)",
+      "event": [
+        {
+          "listen": "prerequest",
+          "script": {
+            "exec": [
+              "pm.sendRequest({ url: pm.collectionVariables.get('baseUrl') + '/api/cartas', method: 'POST', header: {'Content-Type':'application/json'},",
+              "  body: { mode: 'raw', raw: JSON.stringify({remitente:'Sofia', edad:6, ciudad:'Loja', regalos:['Tren']}) } },",
+              "  (err, res) => pm.collectionVariables.set('cartaPendienteId', res.json().id));"
+            ],
+            "type": "text/javascript"
+          }
+        },
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('503', () => pm.response.to.have.status(503));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "PATCH",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "{ \"estado\": \"APROBADA\" }"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaPendienteId}}/estado",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaPendienteId}}",
+            "estado"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "19 Simulador: desactivar mantenimiento",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/mock/lista/mantenimiento?activo=false",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "mock",
+            "lista",
+            "mantenimiento"
+          ],
+          "query": [
+            {
+              "key": "activo",
+              "value": "false"
+            }
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "20 SOAP directo al simulador (XML)",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "text/xml; charset=utf-8"
+          },
+          {
+            "key": "SOAPAction",
+            "value": "ConsultarComportamiento"
+          }
+        ],
+        "body": {
+          "mode": "raw",
+          "raw": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:pn=\"http://polonorte.beatlech/lista\">\n  <soapenv:Body>\n    <pn:ConsultarComportamientoRequest>\n      <pn:nombre>Valentina</pn:nombre>\n      <pn:ciudad>Guayaquil</pn:ciudad>\n    </pn:ConsultarComportamientoRequest>\n  </soapenv:Body>\n</soapenv:Envelope>"
+        },
+        "url": {
+          "raw": "{{baseUrl}}/mock/lista",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "mock",
+            "lista"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "21 DELETE carta RECHAZADA con ELFO_JEFE (204)",
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "exec": [
+              "pm.test('204', () => pm.response.to.have.status(204));"
+            ],
+            "type": "text/javascript"
+          }
+        }
+      ],
+      "request": {
+        "auth": {
+          "type": "basic",
+          "basic": [
+            {
+              "key": "username",
+              "value": "elfojefe",
+              "type": "string"
+            },
+            {
+              "key": "password",
+              "value": "{{auth_password_1bm7}}",
+              "type": "string"
+            }
+          ]
+        },
+        "method": "DELETE",
+        "header": [],
+        "url": {
+          "raw": "{{baseUrl}}/api/cartas/{{cartaTraviesaId}}",
+          "host": [
+            "{{baseUrl}}"
+          ],
+          "path": [
+            "api",
+            "cartas",
+            "{{cartaTraviesaId}}"
+          ]
+        }
+      },
+      "response": []
+    }
+  ],
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:8080"
+    },
+    {
+      "key": "cartaId",
+      "value": "1"
+    },
+    {
+      "key": "cartaTraviesaId",
+      "value": "2"
+    },
+    {
+      "key": "auth_password_01kh",
+      "secret": true
+    },
+    {
+      "key": "auth_password_1bm7",
+      "secret": true
+    },
+    {
+      "key": "cartaPendienteId",
+      "value": ""
+    }
+  ]
+}

@@ -1,0 +1,155 @@
+{
+  "openapi": "3.0.3",
+  "info": {
+    "title": "Taller de Santa - API de Cartas",
+    "version": "1.0.0",
+    "description": "Registro de cartas, flujo RECIBIDA → APROBADA → EN_PRODUCCION → ENTREGADA e integración con el servicio SOAP ListaBuenosTraviesosService.\n\nUsuarios de demo (HTTP Basic): elfojefe / polonorte (ELFO_JEFE), elfo / elfo1234 (ELFO)."
+  },
+  "servers": [{ "url": "/" }],
+  "tags": [
+    { "name": "Cartas", "description": "Cartas a Santa y su flujo de aprobación, producción y entrega" },
+    { "name": "Simulador SOAP", "description": "Imitación de ListaBuenosTraviesosService para pruebas" }
+  ],
+  "paths": {
+    "/api/cartas": {
+      "post": {
+        "tags": ["Cartas"],
+        "summary": "Registrar una carta (pública)",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CartaRequest" } } } },
+        "responses": {
+          "201": { "description": "Creada en estado RECIBIDA", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Carta" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "422": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "get": {
+        "tags": ["Cartas"],
+        "summary": "Listar con filtros opcionales (pública)",
+        "parameters": [
+          { "name": "estado", "in": "query", "schema": { "$ref": "#/components/schemas/Estado" } },
+          { "name": "ciudad", "in": "query", "schema": { "type": "string" }, "description": "Sin distinguir mayúsculas" }
+        ],
+        "responses": {
+          "200": { "description": "Lista de cartas", "content": { "application/json": { "schema": { "type": "array", "items": { "$ref": "#/components/schemas/Carta" } } } } },
+          "400": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/cartas/{id}": {
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+      "get": {
+        "tags": ["Cartas"],
+        "summary": "Ver detalle (pública)",
+        "responses": {
+          "200": { "description": "Carta", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Carta" } } } },
+          "404": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "put": {
+        "tags": ["Cartas"],
+        "summary": "Editar datos, solo en estado RECIBIDA (pública)",
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CartaRequest" } } } },
+        "responses": {
+          "200": { "description": "Carta actualizada", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Carta" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" }
+        }
+      },
+      "delete": {
+        "tags": ["Cartas"],
+        "summary": "Eliminar (rol ELFO_JEFE)",
+        "security": [{ "basicAuth": [] }],
+        "responses": {
+          "204": { "description": "Eliminada" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/api/cartas/{id}/estado": {
+      "parameters": [{ "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }],
+      "patch": {
+        "tags": ["Cartas"],
+        "summary": "Cambiar estado (rol ELFO_JEFE). Hacia APROBADA consulta la lista SOAP",
+        "security": [{ "basicAuth": [] }],
+        "requestBody": { "required": true, "content": { "application/json": { "schema": { "$ref": "#/components/schemas/CambioEstado" } } } },
+        "responses": {
+          "200": { "description": "Estado cambiado (si la lista dice TRAVIESO queda RECHAZADA)", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Carta" } } } },
+          "400": { "$ref": "#/components/responses/Error" },
+          "401": { "$ref": "#/components/responses/Error" },
+          "403": { "$ref": "#/components/responses/Error" },
+          "404": { "$ref": "#/components/responses/Error" },
+          "409": { "$ref": "#/components/responses/Error" },
+          "503": { "$ref": "#/components/responses/Error" }
+        }
+      }
+    },
+    "/mock/lista": {
+      "post": {
+        "tags": ["Simulador SOAP"],
+        "summary": "ConsultarComportamiento (SOAP 1.1)",
+        "requestBody": { "required": true, "content": { "text/xml": { "schema": { "type": "string" },
+          "example": "<soapenv:Envelope xmlns:soapenv=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:pn=\"http://polonorte.beatlech/lista\"><soapenv:Body><pn:ConsultarComportamientoRequest><pn:nombre>Valentina</pn:nombre><pn:ciudad>Guayaquil</pn:ciudad></pn:ConsultarComportamientoRequest></soapenv:Body></soapenv:Envelope>" } } },
+        "responses": { "200": { "description": "pn:resultado BUENO o TRAVIESO" }, "500": { "description": "soap:Fault" } }
+      }
+    },
+    "/mock/lista/mantenimiento": {
+      "post": {
+        "tags": ["Simulador SOAP"],
+        "summary": "Activar/desactivar el soap:Fault 'Lista en mantenimiento'",
+        "parameters": [{ "name": "activo", "in": "query", "required": true, "schema": { "type": "boolean" } }],
+        "responses": { "200": { "description": "Estado del simulador" } }
+      }
+    }
+  },
+  "components": {
+    "securitySchemes": { "basicAuth": { "type": "http", "scheme": "basic" } },
+    "schemas": {
+      "Estado": { "type": "string", "enum": ["RECIBIDA", "APROBADA", "EN_PRODUCCION", "ENTREGADA", "RECHAZADA"] },
+      "Comportamiento": { "type": "string", "enum": ["BUENO", "TRAVIESO", "PENDIENTE_VERIFICACION"] },
+      "CartaRequest": {
+        "type": "object",
+        "required": ["remitente", "edad", "ciudad", "regalos"],
+        "properties": {
+          "remitente": { "type": "string", "minLength": 2, "maxLength": 60, "example": "Valentina" },
+          "edad": { "type": "integer", "minimum": 1, "maximum": 17, "example": 8 },
+          "ciudad": { "type": "string", "example": "Guayaquil" },
+          "regalos": { "type": "array", "minItems": 1, "maxItems": 5, "uniqueItems": true, "items": { "type": "string" }, "example": ["Bicicleta", "Libro de dinosaurios"] }
+        }
+      },
+      "Carta": {
+        "allOf": [
+          { "$ref": "#/components/schemas/CartaRequest" },
+          { "type": "object", "properties": {
+            "id": { "type": "integer", "readOnly": true },
+            "estado": { "$ref": "#/components/schemas/Estado" },
+            "comportamiento": { "$ref": "#/components/schemas/Comportamiento" },
+            "fechaRecepcion": { "type": "string", "format": "date-time", "readOnly": true }
+          } }
+        ]
+      },
+      "CambioEstado": {
+        "type": "object", "required": ["estado"],
+        "properties": { "estado": { "$ref": "#/components/schemas/Estado" } },
+        "example": { "estado": "APROBADA" }
+      },
+      "Error": {
+        "type": "object",
+        "properties": {
+          "timestamp": { "type": "string", "format": "date-time" },
+          "status": { "type": "integer" },
+          "error": { "type": "string" },
+          "mensaje": { "type": "string" },
+          "ruta": { "type": "string" },
+          "detalles": { "type": "object", "additionalProperties": { "type": "string" } }
+        }
+      }
+    },
+    "responses": {
+      "Error": { "description": "Error en formato uniforme", "content": { "application/json": { "schema": { "$ref": "#/components/schemas/Error" } } } }
+    }
+  }
+}
