@@ -193,14 +193,3 @@ En los 400 de validación se añade `detalles`, con el error de cada campo.
 
 ---
 
-## 6. Entregables (checklist)
-
-- [ ] Código fuente: la carpeta `escenario a` (sin `__pycache__`), en GitHub o en un ZIP.
-- [ ] `README.md` (este archivo): ejecución, arquitectura y trazabilidad de requisitos.
-- [ ] Diagrama de arquitectura: `docs/arquitectura.png` (enlazado en la sección 3).
-- [ ] Documentación OpenAPI: `docs/openapi.json` y una captura de `/swagger-ui.html`.
-- [ ] Colección Postman `docs/cartas-santa.postman_collection.json`, con una captura del Runner en verde.
-- [ ] Captura de `python -m unittest -v` con las 15 pruebas OK.
-- [ ] Capturas de los casos clave: 201, 400, 409, 422, `TRAVIESO`→`RECHAZADA`, 503 por `soap:Fault` y 401/403.
-- [ ] Guion de sustentación: `docs/GUION_SUSTENTACION.md`.
-- [ ] Video de sustentación (máx. 5 min): enlace de YouTube no listado, OneDrive o Drive con acceso para el docente.
